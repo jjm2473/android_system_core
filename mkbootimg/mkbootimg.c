@@ -32,7 +32,7 @@ static void *load_file(const char *fn, unsigned *_sz)
     int fd;
 
     data = 0;
-    fd = open(fn, O_RDONLY);
+    fd = open(fn, O_RDONLY | O_BINARY);
     if(fd < 0) return 0;
 
     sz = lseek(fd, 0, SEEK_END);
@@ -254,7 +254,7 @@ int main(int argc, char **argv)
     memcpy(hdr.id, sha,
            SHA_DIGEST_SIZE > sizeof(hdr.id) ? sizeof(hdr.id) : SHA_DIGEST_SIZE);
 
-    fd = open(bootimg, O_CREAT | O_TRUNC | O_WRONLY, 0644);
+    fd = open(bootimg, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0644);
     if(fd < 0) {
         fprintf(stderr,"error: could not create '%s'\n", bootimg);
         return 1;
@@ -278,6 +278,7 @@ int main(int argc, char **argv)
         if(write(fd, dt_data, hdr.dt_size) != hdr.dt_size) goto fail;
         if(write_padding(fd, pagesize, hdr.dt_size)) goto fail;
     }
+    close(fd);
     return 0;
 
 fail:
